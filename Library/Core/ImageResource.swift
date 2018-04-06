@@ -28,32 +28,31 @@ public struct ImageResource: ImageResourceType {
   
   public init(bundle: Bundle, name: String) {
     self.bundle = bundle
-    self.name = name
-    print( "画像名 :\(name) \( existsImageResource(forImageNamed: name) ? "ファイルがある" : "ファイルはない" )" )
+    self.name = ImageResource.existsImageResource(forImageNamed: name)
   }
   
-  
-  func existsImageResource(forImageNamed name: String) -> Bool {
+  // 画像名_Locale.current.languageCode のフォーマットで画像があるかどうかを確認。
+  // 画像がなければ引数を返し、あればそちらを使う
+  static func existsImageResource(forImageNamed name: String) -> String {
     
+    let languageCode = Locale.current.languageCode ?? ""
+    let localedName = "\(name)-\(languageCode)"
+
     let fileManager = FileManager.default
     let cacheDirectory = fileManager.urls(for: .cachesDirectory, in: .userDomainMask)[0]
     let url = cacheDirectory.appendingPathComponent("\(name).png")
     let path = url.path
     
-    return fileManager.fileExists(atPath: path)
-    
-//    guard fileManager.fileExists(atPath: path) else {
-//      guard
-//        let image = UIImage(named: name),
-//        let data = UIImagePNGRepresentation(image)
-//        else { return false }
-//
-//      fileManager.createFile(atPath: path, contents: data, attributes: nil)
-//      return true
-//    }
-//
-//    return true
-    
+    guard fileManager.fileExists(atPath: path) else {
+      guard
+        let image = UIImage(named: name),
+        let data = UIImagePNGRepresentation(image)
+        else { return name }
+      
+      fileManager.createFile(atPath: path, contents: data, attributes: nil)
+      return localedName
+    }
+    return localedName
   }
   
 }
