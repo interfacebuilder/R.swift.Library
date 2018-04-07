@@ -31,7 +31,7 @@ public struct ImageResource: ImageResourceType {
     self.name = ImageResource.existsImageResource(forImageNamed: name)
   }
   
-  // 画像名_Locale.current.languageCode のフォーマットで画像があるかどうかを確認。
+  // 画像名-Locale.current.languageCode のフォーマットで画像があるかどうかを確認。
   // 画像がなければ引数を返し、あればそちらを使う
   static func existsImageResource(forImageNamed name: String) -> String {
     
@@ -40,15 +40,13 @@ public struct ImageResource: ImageResourceType {
 
     let fileManager = FileManager.default
     let cacheDirectory = fileManager.urls(for: .cachesDirectory, in: .userDomainMask)[0]
-    let url = cacheDirectory.appendingPathComponent("\(name).png")
+    let url = cacheDirectory.appendingPathComponent("\(localedName).png")
     let path = url.path
-    
+
     guard fileManager.fileExists(atPath: path) else {
-      guard
-        let image = UIImage(named: name),
-        let data = UIImagePNGRepresentation(image)
-        else { return name }
-      
+      guard let image = UIImage(named: localedName), let data = UIImagePNGRepresentation(image) else {
+        return name
+      }
       fileManager.createFile(atPath: path, contents: data, attributes: nil)
       return localedName
     }
